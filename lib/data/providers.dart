@@ -83,7 +83,9 @@ class AppLockNotifier extends StateNotifier<AppLockState> {
   }
 
   Future<void> factoryReset() async {
-    await _securityService.clearAllSecureData();
+    try {
+      await _securityService.clearAllSecureData();
+    } catch (_) {}
     state = AppLockState.needsSetup;
   }
 }

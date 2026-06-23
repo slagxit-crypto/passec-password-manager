@@ -6,6 +6,7 @@ import 'package:uuid/uuid.dart';
 import 'package:drift/drift.dart' as drift;
 import '../../data/database.dart';
 import '../../data/providers.dart';
+import '../../widgets/auth_dialog.dart';
 import '../../widgets/password_generator.dart';
 
 class AccountScreen extends ConsumerStatefulWidget {
@@ -101,14 +102,8 @@ class _AccountScreenState extends ConsumerState<AccountScreen> {
     }
 
     // Require local authentication to reveal
-    final security = ref.read(securityServiceProvider);
-    final authenticated = await security.authenticateUser();
-    if (!authenticated) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Authentication failed')),
-      );
-      return;
-    }
+    final authenticated = await showAuthDialog(context, ref);
+    if (!authenticated) return;
 
     setState(() {
       _isPasswordRevealed = true;
@@ -230,14 +225,8 @@ class _AccountScreenState extends ConsumerState<AccountScreen> {
 
   Future<void> _deleteAccount() async {
     // Sensitive operation: Authenticate first
-    final authService = ref.read(securityServiceProvider);
-    final authenticated = await authService.authenticateUser();
-    if (!authenticated) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Authentication required to delete account')),
-      );
-      return;
-    }
+    final authenticated = await showAuthDialog(context, ref);
+    if (!authenticated) return;
 
     showDialog(
       context: context,

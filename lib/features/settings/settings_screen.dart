@@ -1,6 +1,5 @@
 import 'dart:convert';
 import 'dart:io';
-import 'dart:js' as js;
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -9,7 +8,9 @@ import 'package:path_provider/path_provider.dart';
 import 'package:path/path.dart' as p;
 import '../../data/database.dart';
 import '../../data/providers.dart';
+import '../../widgets/auth_dialog.dart';
 import '../../core/backup_service.dart';
+import 'web_helper.dart';
 
 class SettingsScreen extends ConsumerStatefulWidget {
   const SettingsScreen({super.key});
@@ -75,7 +76,55 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                         'Select spaces to include in the backup file:',
                         style: TextStyle(fontSize: 12, color: Colors.grey),
                       ),
-                      const SizedBox(height: 12),
+                      const SizedBox(height: 32),
+
+                      // --- ABOUT SECTION ---
+                      Text(
+                        'ABOUT',
+                        style: Theme.of(context).textTheme.titleSmall?.copyWith(
+                              color: Theme.of(context).primaryColor,
+                              fontWeight: FontWeight.bold,
+                            ),
+                      ),
+                      const SizedBox(height: 8),
+                      Card(
+                        margin: EdgeInsets.zero,
+                        child: Column(
+                          children: [
+                            ListTile(
+                              leading: const Icon(Icons.info_outline),
+                              title: const Text('About PASSEC'),
+                              trailing: const Icon(Icons.chevron_right),
+                              onTap: () {
+                                showDialog(
+                                  context: context,
+                                  builder: (context) => const AboutDialog(
+                                    applicationName: 'PASSEC',
+                                    applicationVersion: '1.0.0',
+                                    applicationIcon: Icon(Icons.security, size: 64, color: Color(0xFF3B82F6)),
+                                    children: [
+                                      SizedBox(height: 16),
+                                      Text(
+                                        'PASSEC is an application made to manage your passwords locally. It is a minimal, clean, lightweight, and privacy-focused password manager that securely encrypts all data completely offline using AES-256-CBC encryption.',
+                                      ),
+                                      SizedBox(height: 16),
+                                      Text(
+                                        'This application is completely made by vibe coding by Saint Soori using tools such as: ChatGPT, Antigravity, Claude, and Gemini.',
+                                        style: TextStyle(fontStyle: FontStyle.italic),
+                                      ),
+                                      SizedBox(height: 16),
+                                      Text('Author: Saint Soori', style: TextStyle(fontWeight: FontWeight.bold)),
+                                    ],
+                                  ),
+                                );
+                              },
+                            ),
+                          ],
+                        ),
+                      ),
+                      const SizedBox(height: 32),
+
+                      // --- DANGER ZONE ---
                       ...spaces.map((s) {
                         final isChecked = selectedSpaceIds.contains(s.id);
                         return CheckboxListTile(
@@ -139,45 +188,41 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                       );
 
                       if (kIsWeb) {
-                        // Call JavaScript download helper
-                        js.context.callMethod('downloadFile', ['backup.passec', backupData]);
-                        if (mounted) {
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            const SnackBar(content: Text('Backup file (backup.passec) downloaded successfully!')),
-                          );
-                        }
+                        downloadFileWeb('backup.passec', backupData);
                       } else {
                         // Write to native file (Documents directory)
                         final directory = await getApplicationDocumentsDirectory();
                         final path = p.join(directory.path, 'passec_backup.passec');
                         final file = File(path);
                         await file.writeAsString(backupData);
+                      }
 
-                        if (mounted) {
-                          showDialog(
-                            context: context,
-                            builder: (context) => AlertDialog(
-                              title: const Text('Backup Exported'),
-                              content: Text('Backup successfully saved locally to:\n\n$path'),
-                              actions: [
-                                TextButton(
-                                  onPressed: () {
-                                    Clipboard.setData(ClipboardData(text: backupData));
-                                    Navigator.pop(context);
-                                    ScaffoldMessenger.of(context).showSnackBar(
-                                      const SnackBar(content: Text('Backup content copied to clipboard')),
-                                    );
-                                  },
-                                  child: const Text('Copy to Clipboard'),
-                                ),
-                                TextButton(
-                                  onPressed: () => Navigator.pop(context),
-                                  child: const Text('OK'),
-                                ),
-                              ],
-                            ),
-                          );
-                        }
+                      if (mounted) {
+                        showDialog(
+                          context: context,
+                          builder: (context) => AlertDialog(
+                            title: const Text('Backup Exported'),
+                            content: Text(kIsWeb 
+                                ? 'Backup file (backup.passec) downloaded successfully!\n\nYou can also copy the raw backup code below if you cannot download the file.'
+                                : 'Backup successfully saved locally.'),
+                            actions: [
+                              TextButton(
+                                onPressed: () {
+                                  Clipboard.setData(ClipboardData(text: backupData));
+                                  Navigator.pop(context);
+                                  ScaffoldMessenger.of(context).showSnackBar(
+                                    const SnackBar(content: Text('Backup code copied to clipboard')),
+                                  );
+                                },
+                                child: const Text('Copy Backup Code'),
+                              ),
+                              TextButton(
+                                onPressed: () => Navigator.pop(context),
+                                child: const Text('OK'),
+                              ),
+                            ],
+                          ),
+                        );
                       }
                     } catch (e) {
                       if (mounted) {
@@ -215,7 +260,9 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                   ElevatedButton.icon(
                     onPressed: () {
                       Navigator.pop(context);
-                      _triggerWebFileUpload();
+                      uploadFileWeb((fileContent) {
+                        _promptForImportPassword(fileContent);
+                      });
                     },
                     icon: const Icon(Icons.upload_file),
                     label: const Text('Choose .passec File'),
@@ -280,14 +327,6 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
     );
   }
 
-  void _triggerWebFileUpload() {
-    js.context.callMethod('uploadFile', [
-      js.allowInterop((fileContent) {
-        _promptForImportPassword(fileContent);
-      })
-    ]);
-  }
-
   void _promptForImportPassword(String fileContent) {
     _passwordController.clear();
     showDialog(
@@ -347,16 +386,8 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
   // --- Factory Reset ---
   Future<void> _factoryResetFlow() async {
     // 1. Authenticate user biometrics/PIN first
-    final security = ref.read(securityServiceProvider);
-    final authenticated = await security.authenticateUser();
-    if (!authenticated) {
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Authentication failed. Reset cancelled.')),
-        );
-      }
-      return;
-    }
+    final authenticated = await showAuthDialog(context, ref);
+    if (!authenticated) return;
 
     _resetConfirmationController.clear();
     if (!mounted) return;
@@ -484,6 +515,39 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                   const SizedBox(height: 8),
                 ],
               ),
+            ),
+          ),
+          const SizedBox(height: 12),
+
+          // About Section
+          Card(
+            child: ListTile(
+              leading: const Icon(Icons.info_outline, color: Color(0xFF3B82F6)),
+              title: const Text('About PASSEC'),
+              subtitle: const Text('App info & developer credits'),
+              onTap: () {
+                showDialog(
+                  context: context,
+                  builder: (context) => const AboutDialog(
+                    applicationName: 'PASSEC',
+                    applicationVersion: '1.0.0',
+                    applicationIcon: Icon(Icons.security, size: 64, color: Color(0xFF3B82F6)),
+                    children: [
+                      SizedBox(height: 16),
+                      Text(
+                        'PASSEC is an application made to manage your passwords locally. It is a minimal, clean, lightweight, and privacy-focused password manager that securely encrypts all data completely offline using AES-256-CBC encryption.',
+                      ),
+                      SizedBox(height: 16),
+                      Text(
+                        'This application is completely made by vibe coding by Saint Soori using tools such as: ChatGPT, Antigravity, Claude, and Gemini.',
+                        style: TextStyle(fontStyle: FontStyle.italic),
+                      ),
+                      SizedBox(height: 16),
+                      Text('Author: Saint Soori', style: TextStyle(fontWeight: FontWeight.bold)),
+                    ],
+                  ),
+                );
+              },
             ),
           ),
           const SizedBox(height: 12),

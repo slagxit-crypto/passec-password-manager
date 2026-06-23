@@ -7,6 +7,7 @@ import '../../data/providers.dart';
 import '../space/space_screen.dart';
 import '../settings/settings_screen.dart';
 import '../../widgets/password_generator.dart';
+import '../../widgets/auth_dialog.dart';
 
 class HomeScreen extends ConsumerStatefulWidget {
   const HomeScreen({super.key});
@@ -47,15 +48,22 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
           ElevatedButton(
             onPressed: () async {
               if (nameController.text.trim().isNotEmpty) {
-                final db = ref.read(databaseProvider);
-                await db.insertSpace(
-                  SpacesCompanion.insert(
-                    id: const Uuid().v4(),
-                    name: nameController.text.trim(),
-                    createdAt: drift.Value(DateTime.now()),
-                  ),
-                );
-                Navigator.pop(context);
+                try {
+                  final db = ref.read(databaseProvider);
+                  await db.insertSpace(
+                    SpacesCompanion.insert(
+                      id: const Uuid().v4(),
+                      name: nameController.text.trim(),
+                      createdAt: drift.Value(DateTime.now()),
+                    ),
+                  );
+                  Navigator.pop(context);
+                } catch (e) {
+                  Navigator.pop(context);
+                  ScaffoldMessenger.of(this.context).showSnackBar(
+                    SnackBar(content: Text('Error creating space: $e')),
+                  );
+                }
               }
             },
             child: const Text('Create'),
@@ -78,7 +86,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
             ListTile(
               leading: const Icon(Icons.edit),
               title: const Text('Rename Space'),
-              onPressed: () {
+              onTap: () {
                 Navigator.pop(context);
                 _showRenameSpaceDialog(space);
               },
@@ -86,7 +94,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
             ListTile(
               leading: const Icon(Icons.delete, color: Colors.redAccent),
               title: const Text('Delete Space', style: TextStyle(color: Colors.redAccent)),
-              onPressed: () {
+              onTap: () {
                 Navigator.pop(context);
                 _confirmDeleteSpace(space);
               },
@@ -130,14 +138,8 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
 
   Future<void> _confirmDeleteSpace(Space space) async {
     // Sensitive operation: Authenticate first
-    final authService = ref.read(securityServiceProvider);
-    final authenticated = await authService.authenticateUser();
-    if (!authenticated) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Authentication required to delete space')),
-      );
-      return;
-    }
+    final authenticated = await showAuthDialog(context, ref);
+    if (!authenticated) return;
 
     showDialog(
       context: context,
@@ -250,6 +252,24 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
               StreamBuilder<List<Space>>(
                 stream: db.watchAllSpaces(),
                 builder: (context, snapshot) {
+                  if (snapshot.hasError) {
+                    return Center(
+                      child: Padding(
+                        padding: const EdgeInsets.symmetric(vertical: 40),
+                        child: Column(
+                          children: [
+                            const Icon(Icons.error_outline, size: 64, color: Colors.redAccent),
+                            const SizedBox(height: 12),
+                            Text(
+                              'Database error: ${snapshot.error}',
+                              style: const TextStyle(color: Colors.redAccent),
+                              textAlign: TextAlign.center,
+                            ),
+                          ],
+                        ),
+                      ),
+                    );
+                  }
                   if (!snapshot.hasData) {
                     return const Center(child: CircularProgressIndicator());
                   }

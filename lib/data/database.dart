@@ -1,10 +1,5 @@
-import 'dart:io';
 import 'package:drift/drift.dart';
-import 'package:drift/native.dart';
-import 'package:drift/web.dart';
-import 'package:flutter/foundation.dart';
-import 'package:path/path.dart' as p;
-import 'package:path_provider/path_provider.dart';
+import 'connection.dart';
 
 part 'database.g.dart';
 
@@ -21,7 +16,7 @@ class Spaces extends Table {
 // Table for Accounts
 class Accounts extends Table {
   TextColumn get id => text()();
-  TextColumn get spaceId => text().customConstraint('REFERENCES spaces(id) ON DELETE CASCADE')();
+  TextColumn get spaceId => text().customConstraint('NOT NULL REFERENCES spaces(id) ON DELETE CASCADE')();
   TextColumn get accountName => text().withLength(min: 1, max: 100)();
   TextColumn get username => text()();
   TextColumn get encryptedPassword => text()();
@@ -29,7 +24,7 @@ class Accounts extends Table {
   TextColumn get recoveryEmail => text().nullable()();
   TextColumn get recoveryPhoneNumber => text().nullable()();
   TextColumn get websiteUrl => text().nullable()();
-  TextColumn get isFavorite => boolean().withDefault(const Constant(false))();
+  BoolColumn get isFavorite => boolean().withDefault(const Constant(false))();
   DateTimeColumn get lastAccessedAt => dateTime().nullable()();
   DateTimeColumn get createdAt => dateTime().withDefault(currentDateAndTime)();
   DateTimeColumn get updatedAt => dateTime().withDefault(currentDateAndTime)();
@@ -40,7 +35,7 @@ class Accounts extends Table {
 
 @DriftDatabase(tables: [Spaces, Accounts])
 class AppDatabase extends _$AppDatabase {
-  AppDatabase() : super(_openConnection());
+  AppDatabase() : super(openConnection());
 
   @override
   int get schemaVersion => 1;
@@ -147,15 +142,4 @@ class AppDatabase extends _$AppDatabase {
     await delete(accounts).go();
     await delete(spaces).go();
   }
-}
-
-LazyDatabase _openConnection() {
-  return LazyDatabase(() async {
-    if (kIsWeb) {
-      return WebDatabase('passec_db', logStatements: kDebugMode);
-    }
-    final dbFolder = await getApplicationDocumentsDirectory();
-    final file = File(p.join(dbFolder.path, 'passec.db'));
-    return NativeDatabase(file);
-  });
 }

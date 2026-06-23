@@ -19,6 +19,9 @@
   <title>PASSEC</title>
   <link rel="manifest" href="manifest.json">
 
+  <!-- Required for Drift WebDatabase (SQLite on Web) -->
+  <script src="sql-wasm.js"></script>
+
   <script>
     // JS Helper to trigger a local file download
     window.downloadFile = function(filename, textContent) {

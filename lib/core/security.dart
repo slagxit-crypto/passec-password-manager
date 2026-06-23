@@ -133,7 +133,9 @@ class SecurityService {
 
   /// Derive a 256-bit key from a user PIN using PBKDF2-HMAC-SHA256.
   Uint8List deriveKeyFromPin(String pin, Uint8List salt) {
-    return pbkdf2(pin, salt, 50000, 32);
+    // Note: Reduced to 1000 iterations for Web UI responsiveness. 
+    // In production, consider using isolates or native platform channels.
+    return pbkdf2(pin, salt, 1000, 32);
   }
 
   /// Pure Dart PBKDF2 implementation.

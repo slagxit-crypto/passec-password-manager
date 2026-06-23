@@ -1,7 +1,7 @@
 import 'dart:convert';
 import 'dart:typed_data';
 import 'package:drift/drift.dart';
-import 'database.dart';
+import '../data/database.dart';
 import 'security.dart';
 
 class BackupService {

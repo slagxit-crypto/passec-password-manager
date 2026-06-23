@@ -25,56 +25,117 @@ class PassecApp extends ConsumerWidget {
       title: 'PASSEC',
       debugShowCheckedModeBanner: false,
       themeMode: themeMode,
-      // Minimal Premium Light Theme
+      // Minimalist Modern Light Theme
       theme: ThemeData(
         brightness: Brightness.light,
-        primaryColor: const Color(0xFF2563EB),
-        scaffoldBackgroundColor: const Color(0xFFF8FAFC),
+        primaryColor: Colors.black,
+        scaffoldBackgroundColor: const Color(0xFFFAFAFA),
         colorScheme: const ColorScheme.light(
-          primary: Color(0xFF2563EB),
-          secondary: Color(0xFF0EA5E9),
+          primary: Colors.black,
+          secondary: Colors.black54,
           surface: Colors.white,
-          onSurface: Color(0xFF0F172A),
+          onSurface: Colors.black87,
         ),
-        cardTheme: CardTheme(
+        appBarTheme: const AppBarTheme(
+          backgroundColor: Color(0xFFFAFAFA),
+          elevation: 0,
+          iconTheme: IconThemeData(color: Colors.black87),
+          titleTextStyle: TextStyle(color: Colors.black87, fontWeight: FontWeight.bold, fontSize: 20),
+        ),
+        cardTheme: CardThemeData(
           color: Colors.white,
           elevation: 0,
           shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(16),
-            side: const BorderSide(color: Color(0xFFE2E8F0)),
+            borderRadius: BorderRadius.circular(12),
+            side: BorderSide(color: Colors.grey.shade200),
           ),
         ),
         textTheme: const TextTheme(
-          titleLarge: TextStyle(fontWeight: FontWeight.bold, color: Color(0xFF0F172A)),
-          titleMedium: TextStyle(fontWeight: FontWeight.w600, color: Color(0xFF1E293B)),
-          bodyMedium: TextStyle(color: Color(0xFF475569)),
+          titleLarge: TextStyle(fontWeight: FontWeight.bold, color: Colors.black87),
+          titleMedium: TextStyle(fontWeight: FontWeight.w600, color: Colors.black87),
+          bodyMedium: TextStyle(color: Colors.black54),
+        ),
+        inputDecorationTheme: InputDecorationTheme(
+          filled: true,
+          fillColor: Colors.grey.shade50,
+          border: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(12),
+            borderSide: BorderSide(color: Colors.grey.shade300),
+          ),
+          enabledBorder: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(12),
+            borderSide: BorderSide(color: Colors.grey.shade300),
+          ),
+          focusedBorder: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(12),
+            borderSide: const BorderSide(color: Colors.black, width: 2),
+          ),
+        ),
+        elevatedButtonTheme: ElevatedButtonThemeData(
+          style: ElevatedButton.styleFrom(
+            backgroundColor: Colors.black,
+            foregroundColor: Colors.white,
+            elevation: 0,
+            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+            padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 14),
+          ),
         ),
         useMaterial3: true,
       ),
-      // Sleek Cyber Dark Theme
+      // Minimalist Modern Dark Theme
       darkTheme: ThemeData(
         brightness: Brightness.dark,
-        primaryColor: const Color(0xFF3B82F6),
-        scaffoldBackgroundColor: const Color(0xFF0A0F1D),
+        primaryColor: Colors.white,
+        scaffoldBackgroundColor: const Color(0xFF121212),
         colorScheme: const ColorScheme.dark(
-          primary: Color(0xFF3B82F6),
-          secondary: Color(0xFF06B6D4),
-          surface: Color(0xFF151D30),
+          primary: Colors.white,
+          secondary: Colors.grey,
+          surface: Color(0xFF1E1E1E),
           onSurface: Colors.white,
-          background: Color(0xFF0A0F1D),
         ),
-        cardTheme: CardTheme(
-          color: const Color(0xFF151D30).withOpacity(0.7),
+        appBarTheme: const AppBarTheme(
+          backgroundColor: Color(0xFF121212),
+          elevation: 0,
+          iconTheme: IconThemeData(color: Colors.white),
+          titleTextStyle: TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 20),
+        ),
+        cardTheme: CardThemeData(
+          color: const Color(0xFF1E1E1E),
           elevation: 0,
           shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(16),
-            side: BorderSide(color: Colors.white.withOpacity(0.06)),
+            borderRadius: BorderRadius.circular(12),
+            side: BorderSide(color: Colors.grey.shade900),
           ),
         ),
         textTheme: const TextTheme(
           titleLarge: TextStyle(fontWeight: FontWeight.bold, color: Colors.white),
-          titleMedium: TextStyle(fontWeight: FontWeight.w600, color: Color(0xFFE2E8F0)),
-          bodyMedium: TextStyle(color: Color(0xFF94A3B8)),
+          titleMedium: TextStyle(fontWeight: FontWeight.w600, color: Colors.white70),
+          bodyMedium: TextStyle(color: Colors.white60),
+        ),
+        inputDecorationTheme: InputDecorationTheme(
+          filled: true,
+          fillColor: const Color(0xFF1A1A1A),
+          border: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(12),
+            borderSide: BorderSide(color: Colors.grey.shade800),
+          ),
+          enabledBorder: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(12),
+            borderSide: BorderSide(color: Colors.grey.shade800),
+          ),
+          focusedBorder: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(12),
+            borderSide: const BorderSide(color: Colors.white, width: 2),
+          ),
+        ),
+        elevatedButtonTheme: ElevatedButtonThemeData(
+          style: ElevatedButton.styleFrom(
+            backgroundColor: Colors.white,
+            foregroundColor: Colors.black,
+            elevation: 0,
+            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+            padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 14),
+          ),
         ),
         useMaterial3: true,
       ),
@@ -184,7 +245,14 @@ class _SetupScreenState extends ConsumerState<SetupScreen> {
         );
         return;
       }
-      await ref.read(appLockProvider.notifier).setupPIN(_pinController.text);
+      try {
+        await ref.read(appLockProvider.notifier).setupPIN(_pinController.text);
+      } catch (e) {
+        if (!mounted) return;
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Error: $e')),
+        );
+      }
     }
   }
 
@@ -325,6 +393,7 @@ class _LockScreenState extends ConsumerState<LockScreen> {
   final _pinController = TextEditingController();
   bool _showPinInput = false;
   String _errorMessage = '';
+  int _failedAttempts = 0;
 
   @override
   void initState() {
@@ -357,10 +426,14 @@ class _LockScreenState extends ConsumerState<LockScreen> {
     final success = await ref.read(appLockProvider.notifier).unlockWithPIN(_pinController.text);
     if (success) {
       _pinController.clear();
+      setState(() {
+        _failedAttempts = 0;
+      });
     } else {
       setState(() {
         _errorMessage = 'Incorrect PIN. Please try again.';
         _pinController.clear();
+        _failedAttempts++;
       });
     }
   }
@@ -431,6 +504,7 @@ class _LockScreenState extends ConsumerState<LockScreen> {
                   },
                 ),
                 const SizedBox(height: 16),
+                const SizedBox(height: 16),
                 TextButton(
                   onPressed: () {
                     setState(() {
@@ -439,6 +513,44 @@ class _LockScreenState extends ConsumerState<LockScreen> {
                     _tryBiometricUnlock();
                   },
                   child: const Text('Use Biometrics'),
+                ),
+              ],
+              if (_failedAttempts > 0) ...[
+                const SizedBox(height: 48),
+                TextButton.icon(
+                  onPressed: () async {
+                    showDialog(
+                      context: context,
+                      builder: (context) => AlertDialog(
+                        title: const Text('Factory Reset?'),
+                        content: const Text('This will delete all your vaults and accounts. This action cannot be undone.'),
+                        actions: [
+                          TextButton(
+                            onPressed: () => Navigator.pop(context),
+                            child: const Text('Cancel'),
+                          ),
+                          TextButton(
+                            onPressed: () async {
+                              Navigator.pop(context);
+                              try {
+                                await ref.read(appLockProvider.notifier).factoryReset();
+                              } catch (e) {
+                                debugPrint('Factory reset failed: $e');
+                              }
+                              try {
+                                await ref.read(databaseProvider).clearDatabase();
+                              } catch (e) {
+                                debugPrint('Database clear failed: $e');
+                              }
+                            },
+                            child: const Text('Reset', style: TextStyle(color: Colors.redAccent)),
+                          ),
+                        ],
+                      ),
+                    );
+                  },
+                  icon: const Icon(Icons.warning_amber_rounded, color: Colors.redAccent, size: 20),
+                  label: const Text('Reset App Data', style: TextStyle(color: Colors.redAccent)),
                 ),
               ],
             ],
