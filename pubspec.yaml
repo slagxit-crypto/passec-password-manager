@@ -1,0 +1,48 @@
+name: passec
+description: "A minimal, clean, lightweight, and privacy-focused password manager."
+publish_to: 'none'
+
+version: 1.0.0+1
+
+environment:
+  sdk: '>=3.3.0 <4.0.0'
+
+dependencies:
+  flutter:
+    sdk: flutter
+
+  # State Management
+  flutter_riverpod: ^2.5.1
+  riverpod_annotation: ^2.3.3
+
+  # Database (Drift/SQLite)
+  drift: ^2.19.1
+  sqlite3_flutter_libs: ^0.5.24
+  path_provider: ^2.1.3
+  path: ^1.9.0
+
+  # Cryptography & Security
+  encrypt: ^5.0.3
+  flutter_secure_storage: ^9.2.2
+  local_auth: ^2.2.0
+
+  # Utilities
+  uuid: ^4.3.3
+  shared_preferences: ^2.2.3
+  crypto: ^3.0.3
+
+  # Icons
+  cupertino_icons: ^1.0.6
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+
+  # Code Generators
+  drift_dev: ^2.19.1
+  riverpod_generator: ^2.4.0
+  build_runner: ^2.4.11
+  flutter_lints: ^3.0.0
+
+flutter:
+  uses-material-design: true
