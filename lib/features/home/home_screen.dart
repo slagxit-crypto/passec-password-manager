@@ -302,9 +302,9 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                     physics: const NeverScrollableScrollPhysics(),
                     gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
                       crossAxisCount: 2,
-                      crossAxisSpacing: 16,
-                      mainAxisSpacing: 16,
-                      childAspectRatio: 1.2,
+                      crossAxisSpacing: 12,
+                      mainAxisSpacing: 12,
+                      childAspectRatio: 1.1,
                     ),
                     itemCount: filteredSpaces.length,
                     itemBuilder: (context, index) {
@@ -325,29 +325,32 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                             onLongPress: () => _showSpaceOptions(space),
                             child: Card(
                               child: Padding(
-                                padding: const EdgeInsets.all(16.0),
+                                padding: const EdgeInsets.all(12.0),
                                 child: Column(
                                   crossAxisAlignment: CrossAxisAlignment.start,
                                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                                   children: [
                                     Row(
                                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                      crossAxisAlignment: CrossAxisAlignment.start,
                                       children: [
-                                        const Icon(Icons.folder, color: Color(0xFF3B82F6)),
+                                        const Icon(Icons.folder, color: Color(0xFF3B82F6), size: 28),
                                         IconButton(
-                                          icon: const Icon(Icons.more_vert, size: 18),
+                                          icon: const Icon(Icons.more_vert, size: 20),
                                           padding: EdgeInsets.zero,
                                           constraints: const BoxConstraints(),
                                           onPressed: () => _showSpaceOptions(space),
                                         ),
                                       ],
                                     ),
-                                    const SizedBox(height: 8),
+                                    const SizedBox(height: 4),
                                     Text(
                                       space.name,
                                       maxLines: 1,
                                       overflow: TextOverflow.ellipsis,
-                                      style: Theme.of(context).textTheme.titleMedium,
+                                      style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                                        fontSize: 16,
+                                      ),
                                     ),
                                     const SizedBox(height: 4),
                                     Text(

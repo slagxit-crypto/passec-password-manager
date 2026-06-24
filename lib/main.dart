@@ -14,11 +14,46 @@ void main() {
   );
 }
 
-class PassecApp extends ConsumerWidget {
+class PassecApp extends ConsumerStatefulWidget {
   const PassecApp({super.key});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<PassecApp> createState() => _PassecAppState();
+}
+
+class _PassecAppState extends ConsumerState<PassecApp> with WidgetsBindingObserver {
+  DateTime? _pausedTime;
+
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addObserver(this);
+  }
+
+  @override
+  void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
+    super.dispose();
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    if (state == AppLifecycleState.paused || state == AppLifecycleState.inactive) {
+      _pausedTime ??= DateTime.now();
+    } else if (state == AppLifecycleState.resumed) {
+      if (_pausedTime != null) {
+        final autoLockDuration = ref.read(autoLockProvider);
+        final elapsed = DateTime.now().difference(_pausedTime!);
+        if (elapsed >= autoLockDuration) {
+          ref.read(appLockProvider.notifier).lock();
+        }
+        _pausedTime = null;
+      }
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
     final themeMode = ref.watch(themeProvider);
 
     return MaterialApp(

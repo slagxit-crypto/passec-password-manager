@@ -6,6 +6,8 @@ import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:path/path.dart' as p;
+import 'package:share_plus/share_plus.dart';
+import 'package:file_picker/file_picker.dart';
 import '../../data/database.dart';
 import '../../data/providers.dart';
 import '../../widgets/auth_dialog.dart';
@@ -190,11 +192,12 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                       if (kIsWeb) {
                         downloadFileWeb('backup.passec', backupData);
                       } else {
-                        // Write to native file (Documents directory)
-                        final directory = await getApplicationDocumentsDirectory();
+                        // Write to native file and share
+                        final directory = await getTemporaryDirectory();
                         final path = p.join(directory.path, 'passec_backup.passec');
                         final file = File(path);
                         await file.writeAsString(backupData);
+                        await Share.shareXFiles([XFile(path)], text: 'My PASSEC Backup');
                       }
 
                       if (mounted) {
@@ -256,13 +259,32 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
-                if (kIsWeb) ...[
                   ElevatedButton.icon(
-                    onPressed: () {
+                    onPressed: () async {
                       Navigator.pop(context);
-                      uploadFileWeb((fileContent) {
-                        _promptForImportPassword(fileContent);
-                      });
+                      if (kIsWeb) {
+                        uploadFileWeb((fileContent) {
+                          _promptForImportPassword(fileContent);
+                        });
+                      } else {
+                        try {
+                          final result = await FilePicker.platform.pickFiles(
+                            type: FileType.any,
+                            allowMultiple: false,
+                          );
+                          if (result != null && result.files.single.path != null) {
+                            final file = File(result.files.single.path!);
+                            final fileContent = await file.readAsString();
+                            _promptForImportPassword(fileContent);
+                          }
+                        } catch (e) {
+                          if (context.mounted) {
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              SnackBar(content: Text('Failed to read file: $e')),
+                            );
+                          }
+                        }
+                      }
                     },
                     icon: const Icon(Icons.upload_file),
                     label: const Text('Choose .passec File'),
@@ -271,7 +293,6 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                     padding: EdgeInsets.symmetric(vertical: 8.0),
                     child: Text('OR paste backup code below:'),
                   ),
-                ],
                 TextField(
                   controller: backupCodeController,
                   maxLines: 4,
