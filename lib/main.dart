@@ -56,10 +56,54 @@ class _PassecAppState extends ConsumerState<PassecApp> with WidgetsBindingObserv
   Widget build(BuildContext context) {
     final themeMode = ref.watch(themeProvider);
 
-    // Dark Purple Theme (matching design)
-    final darkPurple = ThemeData(
-      brightness: Brightness.dark,
+    final lightTheme = ThemeData(
+      brightness: Brightness.light,
       useMaterial3: true,
+      colorSchemeSeed: const Color(0xFF6C63FF),
+      scaffoldBackgroundColor: const Color(0xFFF5F5F5),
+      appBarTheme: const AppBarTheme(
+        backgroundColor: Color(0xFFF5F5F5),
+        elevation: 0,
+        centerTitle: false,
+        iconTheme: IconThemeData(color: Colors.black87),
+        titleTextStyle: TextStyle(color: Colors.black87, fontWeight: FontWeight.bold, fontSize: 18),
+      ),
+      cardTheme: CardThemeData(
+        color: Colors.white,
+        elevation: 0,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(16),
+          side: const BorderSide(color: Color(0xFFE0E0E0), width: 1),
+        ),
+      ),
+      inputDecorationTheme: InputDecorationTheme(
+        filled: true,
+        fillColor: Colors.white,
+        border: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(14),
+          borderSide: const BorderSide(color: Color(0xFFE0E0E0)),
+        ),
+        enabledBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(14),
+          borderSide: const BorderSide(color: Color(0xFFE0E0E0)),
+        ),
+        focusedBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(14),
+          borderSide: const BorderSide(color: Color(0xFF6C63FF), width: 2),
+        ),
+      ),
+      elevatedButtonTheme: ElevatedButtonThemeData(
+        style: ElevatedButton.styleFrom(
+          backgroundColor: const Color(0xFF6C63FF),
+          foregroundColor: Colors.white,
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+          padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 14),
+        ),
+      ),
+      dialogTheme: DialogThemeData(
+        backgroundColor: Colors.white,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+      ),
     );
 
     final darkTheme = ThemeData(
@@ -167,12 +211,11 @@ class _PassecAppState extends ConsumerState<PassecApp> with WidgetsBindingObserv
       iconTheme: const IconThemeData(color: Color(0xFF6C63FF)),
     );
 
-    // Light theme is the same dark purple (app is primarily dark)
     return MaterialApp(
       title: 'PASSEC',
       debugShowCheckedModeBanner: false,
-      themeMode: ThemeMode.dark, // Always use dark purple theme
-      theme: darkTheme,
+      themeMode: themeMode, // Use the user's selected theme
+      theme: lightTheme,
       darkTheme: darkTheme,
       home: const LifecycleManager(
         child: AppLockRouter(),

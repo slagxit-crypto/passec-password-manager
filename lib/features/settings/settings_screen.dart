@@ -190,29 +190,14 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                         db: db,
                       );
 
-                      if (kIsWeb) {
-                        downloadFileWeb('passec_backup.passec', backupData);
-                      } else {
-                        // Save directly to Downloads folder on mobile
-                        final bytes = Uint8List.fromList(utf8.encode(backupData));
-                        await FileSaver.instance.saveFile(
-                          name: 'passec_backup',
-                          bytes: bytes,
-                          ext: 'passec',
-                          mimeType: MimeType.text,
-                        );
-                      }
-
                       if (mounted) {
                         showDialog(
                           context: context,
                           builder: (context) => AlertDialog(
-                            title: const Text('Backup Exported'),
-                            content: Text(kIsWeb 
-                                ? 'Backup file (passec_backup.passec) downloaded successfully!\n\nYou can also copy the raw backup code below if you cannot download the file.'
-                                : 'Backup successfully saved to your Downloads folder!\n\nYou can also copy the raw backup code below.'),
+                            title: const Text('Backup Created'),
+                            content: const Text('Your encrypted backup was created successfully. How would you like to save it?'),
                             actions: [
-                              TextButton(
+                              TextButton.icon(
                                 onPressed: () {
                                   Clipboard.setData(ClipboardData(text: backupData));
                                   Navigator.pop(context);
@@ -220,11 +205,25 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                                     const SnackBar(content: Text('Backup code copied to clipboard')),
                                   );
                                 },
-                                child: const Text('Copy Backup Code'),
+                                icon: const Icon(Icons.copy, size: 18),
+                                label: const Text('Copy Code'),
                               ),
-                              TextButton(
-                                onPressed: () => Navigator.pop(context),
-                                child: const Text('OK'),
+                              ElevatedButton.icon(
+                                onPressed: () async {
+                                  Navigator.pop(context);
+                                  if (kIsWeb) {
+                                    downloadFileWeb('passec_backup.passec', backupData);
+                                  } else {
+                                    // Use Share sheet to save to file manager securely
+                                    final directory = await getTemporaryDirectory();
+                                    final path = p.join(directory.path, 'passec_backup.passec');
+                                    final file = File(path);
+                                    await file.writeAsString(backupData);
+                                    await Share.shareXFiles([XFile(path)], text: 'My PASSEC Backup');
+                                  }
+                                },
+                                icon: const Icon(Icons.download, size: 18),
+                                label: const Text('Download File'),
                               ),
                             ],
                           ),
