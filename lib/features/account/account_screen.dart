@@ -303,8 +303,12 @@ class _AccountScreenState extends ConsumerState<AccountScreen> {
             children: [
               // ---------------- READ-ONLY VIEW ----------------
               if (!_isEditing && widget.account != null) ...[
-                _buildReadOnlyField('Account Name', _nameController.text, Icons.label_outline),
-                _buildReadOnlyField('Username / Email', _usernameController.text, Icons.person_outline, copyable: true),
+                const Padding(
+                  padding: EdgeInsets.symmetric(vertical: 8.0),
+                  child: Text('REQUIRED', style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold, letterSpacing: 1.5, color: Colors.grey)),
+                ),
+                _buildReadOnlyField('Account Name', _nameController.text, Icons.folder, copyable: true),
+                _buildReadOnlyField('Email / Username / Phone', _usernameController.text, Icons.alternate_email, copyable: true),
                 
                 // Password Field Card with View/Copy Actions
                 Card(
@@ -313,13 +317,19 @@ class _AccountScreenState extends ConsumerState<AccountScreen> {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        const Text('Password', style: TextStyle(fontSize: 12, color: Colors.grey)),
-                        const SizedBox(height: 8),
+                        const Row(
+                          children: [
+                            Icon(Icons.lock, color: Colors.grey, size: 16),
+                            SizedBox(width: 8),
+                            Text('Password *', style: TextStyle(fontSize: 12, color: Colors.grey)),
+                          ]
+                        ),
+                        const SizedBox(height: 12),
                         Row(
                           children: [
                             Expanded(
                               child: Text(
-                                _isPasswordRevealed ? getDecryptedPassword() : '••••••••••••••••',
+                                _isPasswordRevealed ? getDecryptedPassword() : '••••••••••••••••••••',
                                 style: TextStyle(
                                   fontSize: 18,
                                   fontWeight: FontWeight.bold,
@@ -342,13 +352,28 @@ class _AccountScreenState extends ConsumerState<AccountScreen> {
                                   style: const TextStyle(fontSize: 10, color: Colors.white, fontWeight: FontWeight.bold),
                                 ),
                               ),
-                            IconButton(
-                              icon: Icon(_isPasswordRevealed ? Icons.visibility_off : Icons.visibility),
-                              onPressed: _revealPassword,
+                          ],
+                        ),
+                        const SizedBox(height: 16),
+                        Row(
+                          children: [
+                            Expanded(
+                              child: OutlinedButton.icon(
+                                onPressed: _revealPassword,
+                                icon: Icon(_isPasswordRevealed ? Icons.visibility_off : Icons.visibility, size: 18),
+                                label: Text(_isPasswordRevealed ? 'Hide' : 'View'),
+                              ),
                             ),
-                            IconButton(
-                              icon: const Icon(Icons.copy),
-                              onPressed: _copyPassword,
+                            const SizedBox(width: 12),
+                            Expanded(
+                              child: OutlinedButton.icon(
+                                onPressed: _copyPassword,
+                                icon: const Icon(Icons.copy, size: 18, color: Colors.green),
+                                label: const Text('Copy', style: TextStyle(color: Colors.green)),
+                                style: OutlinedButton.styleFrom(
+                                  side: const BorderSide(color: Colors.green),
+                                ),
+                              ),
                             ),
                           ],
                         ),
@@ -358,14 +383,20 @@ class _AccountScreenState extends ConsumerState<AccountScreen> {
                 ),
                 const SizedBox(height: 12),
 
-                if (_websiteUrlController.text.isNotEmpty)
-                  _buildReadOnlyField('Website', _websiteUrlController.text, Icons.link_outlined, copyable: true),
-                if (_recoveryEmailController.text.isNotEmpty)
-                  _buildReadOnlyField('Recovery Email', _recoveryEmailController.text, Icons.mail_outline, copyable: true),
-                if (_recoveryPhoneController.text.isNotEmpty)
-                  _buildReadOnlyField('Recovery Phone', _recoveryPhoneController.text, Icons.phone_android_outlined, copyable: true),
-                if (_notesController.text.isNotEmpty)
-                  _buildReadOnlyField('Notes', _notesController.text, Icons.notes_outlined, maxLines: 5),
+                if (_notesController.text.isNotEmpty || _recoveryEmailController.text.isNotEmpty || _recoveryPhoneController.text.isNotEmpty || _websiteUrlController.text.isNotEmpty) ...[
+                  const Padding(
+                    padding: EdgeInsets.only(top: 16.0, bottom: 8.0),
+                    child: Text('OPTIONAL', style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold, letterSpacing: 1.5, color: Colors.grey)),
+                  ),
+                  if (_notesController.text.isNotEmpty)
+                    _buildReadOnlyField('Notes', _notesController.text, Icons.notes, maxLines: 5, copyable: true),
+                  if (_recoveryEmailController.text.isNotEmpty)
+                    _buildReadOnlyField('Recovery Email', _recoveryEmailController.text, Icons.mail, copyable: true),
+                  if (_recoveryPhoneController.text.isNotEmpty)
+                    _buildReadOnlyField('Recovery Phone', _recoveryPhoneController.text, Icons.phone, copyable: true),
+                  if (_websiteUrlController.text.isNotEmpty)
+                    _buildReadOnlyField('Website URL', _websiteUrlController.text, Icons.link, copyable: true),
+                ],
 
                 const SizedBox(height: 40),
                 ElevatedButton.icon(
@@ -534,38 +565,46 @@ class _AccountScreenState extends ConsumerState<AccountScreen> {
       margin: const EdgeInsets.only(bottom: 12),
       child: Padding(
         padding: const EdgeInsets.all(16.0),
-        child: Row(
+        child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Icon(icon, color: const Color(0xFF3B82F6)),
-            const SizedBox(width: 16),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(label, style: const TextStyle(fontSize: 12, color: Colors.grey)),
-                  const SizedBox(height: 4),
-                  Text(
-                    value,
-                    style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w500),
-                    maxLines: maxLines,
-                    overflow: TextOverflow.ellipsis,
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Row(
+                  children: [
+                    Icon(icon, color: Colors.grey, size: 16),
+                    const SizedBox(width: 8),
+                    Text('$label ${label == 'Account Name' || label.startsWith('Email') ? '*' : ''}', style: const TextStyle(fontSize: 12, color: Colors.grey)),
+                  ],
+                ),
+                if (copyable)
+                  SizedBox(
+                    height: 28,
+                    child: OutlinedButton.icon(
+                      onPressed: () {
+                        Clipboard.setData(ClipboardData(text: value));
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(content: Text('$label copied to clipboard')),
+                        );
+                      },
+                      icon: const Icon(Icons.copy, size: 14, color: Colors.grey),
+                      label: const Text('Copy', style: TextStyle(fontSize: 12, color: Colors.grey)),
+                      style: OutlinedButton.styleFrom(
+                        padding: const EdgeInsets.symmetric(horizontal: 8),
+                        side: BorderSide(color: Colors.grey.shade800),
+                      ),
+                    ),
                   ),
-                ],
-              ),
+              ],
             ),
-            if (copyable)
-              IconButton(
-                icon: const Icon(Icons.copy, size: 20, color: Colors.grey),
-                padding: EdgeInsets.zero,
-                constraints: const BoxConstraints(),
-                onPressed: () {
-                  Clipboard.setData(ClipboardData(text: value));
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(content: Text('$label copied to clipboard')),
-                  );
-                },
-              ),
+            const SizedBox(height: 8),
+            Text(
+              value,
+              style: const TextStyle(fontSize: 16),
+              maxLines: maxLines,
+              overflow: TextOverflow.ellipsis,
+            ),
           ],
         ),
       ),

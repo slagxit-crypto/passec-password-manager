@@ -7,10 +7,11 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:path/path.dart' as p;
 import 'package:share_plus/share_plus.dart';
-import 'package:file_picker/file_picker.dart';
 import '../../data/database.dart';
 import '../../data/providers.dart';
 import '../../widgets/auth_dialog.dart';
+import 'package:file_picker/file_picker.dart';
+import 'package:file_saver/file_saver.dart';
 import '../../core/backup_service.dart';
 import 'web_helper.dart';
 
@@ -190,14 +191,16 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                       );
 
                       if (kIsWeb) {
-                        downloadFileWeb('backup.passec', backupData);
+                        downloadFileWeb('passec_backup.passec', backupData);
                       } else {
-                        // Write to native file and share
-                        final directory = await getTemporaryDirectory();
-                        final path = p.join(directory.path, 'passec_backup.passec');
-                        final file = File(path);
-                        await file.writeAsString(backupData);
-                        await Share.shareXFiles([XFile(path)], text: 'My PASSEC Backup');
+                        // Save directly to Downloads folder on mobile
+                        final bytes = Uint8List.fromList(utf8.encode(backupData));
+                        await FileSaver.instance.saveFile(
+                          name: 'passec_backup',
+                          bytes: bytes,
+                          ext: 'passec',
+                          mimeType: MimeType.text,
+                        );
                       }
 
                       if (mounted) {
@@ -206,8 +209,8 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                           builder: (context) => AlertDialog(
                             title: const Text('Backup Exported'),
                             content: Text(kIsWeb 
-                                ? 'Backup file (backup.passec) downloaded successfully!\n\nYou can also copy the raw backup code below if you cannot download the file.'
-                                : 'Backup successfully saved locally.'),
+                                ? 'Backup file (passec_backup.passec) downloaded successfully!\n\nYou can also copy the raw backup code below if you cannot download the file.'
+                                : 'Backup successfully saved to your Downloads folder!\n\nYou can also copy the raw backup code below.'),
                             actions: [
                               TextButton(
                                 onPressed: () {
@@ -267,21 +270,18 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                           _promptForImportPassword(fileContent);
                         });
                       } else {
-                        try {
-                          final result = await FilePicker.platform.pickFiles(
-                            type: FileType.any,
-                            allowMultiple: false,
-                          );
-                          if (result != null && result.files.single.path != null) {
+                        final result = await FilePicker.platform.pickFiles(type: FileType.any);
+                        if (result != null && result.files.single.path != null) {
+                          try {
                             final file = File(result.files.single.path!);
                             final fileContent = await file.readAsString();
                             _promptForImportPassword(fileContent);
-                          }
-                        } catch (e) {
-                          if (context.mounted) {
-                            ScaffoldMessenger.of(context).showSnackBar(
-                              SnackBar(content: Text('Failed to read file: $e')),
-                            );
+                          } catch (e) {
+                            if (mounted) {
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                const SnackBar(content: Text('Error reading file. Please paste code instead.')),
+                              );
+                            }
                           }
                         }
                       }

@@ -56,130 +56,131 @@ class _PassecAppState extends ConsumerState<PassecApp> with WidgetsBindingObserv
   Widget build(BuildContext context) {
     final themeMode = ref.watch(themeProvider);
 
+    // Dark Purple Theme (matching design)
+    final darkPurple = ThemeData(
+      brightness: Brightness.dark,
+      useMaterial3: true,
+    );
+
+    final darkTheme = ThemeData(
+      brightness: Brightness.dark,
+      useMaterial3: true,
+      primaryColor: const Color(0xFF6C63FF),
+      scaffoldBackgroundColor: const Color(0xFF0D0D1A),
+      colorScheme: const ColorScheme.dark(
+        primary: Color(0xFF6C63FF),
+        secondary: Color(0xFF4CAF50),
+        surface: Color(0xFF13132A),
+        onSurface: Colors.white,
+        onPrimary: Colors.white,
+        tertiary: Color(0xFFFFC107),
+      ),
+      appBarTheme: const AppBarTheme(
+        backgroundColor: Color(0xFF0D0D1A),
+        elevation: 0,
+        centerTitle: false,
+        iconTheme: IconThemeData(color: Colors.white),
+        titleTextStyle: TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 18),
+      ),
+      cardTheme: CardThemeData(
+        color: const Color(0xFF13132A),
+        elevation: 0,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(16),
+          side: const BorderSide(color: Color(0xFF2A2A4A), width: 1),
+        ),
+      ),
+      textTheme: const TextTheme(
+        titleLarge: TextStyle(fontWeight: FontWeight.bold, color: Colors.white),
+        titleMedium: TextStyle(fontWeight: FontWeight.w600, color: Colors.white),
+        bodyLarge: TextStyle(color: Colors.white),
+        bodyMedium: TextStyle(color: Color(0xFFAAAAAA)),
+        labelSmall: TextStyle(color: Color(0xFF888888)),
+      ),
+      inputDecorationTheme: InputDecorationTheme(
+        filled: true,
+        fillColor: const Color(0xFF1A1A30),
+        hintStyle: const TextStyle(color: Color(0xFF555580)),
+        labelStyle: const TextStyle(color: Color(0xFF8888AA)),
+        border: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(14),
+          borderSide: const BorderSide(color: Color(0xFF2A2A4A)),
+        ),
+        enabledBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(14),
+          borderSide: const BorderSide(color: Color(0xFF2A2A4A)),
+        ),
+        focusedBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(14),
+          borderSide: const BorderSide(color: Color(0xFF6C63FF), width: 2),
+        ),
+        prefixIconColor: const Color(0xFF6C63FF),
+      ),
+      elevatedButtonTheme: ElevatedButtonThemeData(
+        style: ElevatedButton.styleFrom(
+          backgroundColor: const Color(0xFF6C63FF),
+          foregroundColor: Colors.white,
+          elevation: 0,
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+          padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 14),
+        ),
+      ),
+      textButtonTheme: TextButtonThemeData(
+        style: TextButton.styleFrom(
+          foregroundColor: const Color(0xFF6C63FF),
+        ),
+      ),
+      chipTheme: ChipThemeData(
+        backgroundColor: const Color(0xFF1A1A30),
+        selectedColor: const Color(0xFF6C63FF),
+        labelStyle: const TextStyle(color: Colors.white),
+        side: const BorderSide(color: Color(0xFF2A2A4A)),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+      ),
+      dividerTheme: const DividerThemeData(color: Color(0xFF2A2A4A)),
+      listTileTheme: const ListTileThemeData(
+        iconColor: Color(0xFF6C63FF),
+        textColor: Colors.white,
+      ),
+      dialogTheme: DialogThemeData(
+        backgroundColor: const Color(0xFF13132A),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+      ),
+      bottomSheetTheme: const BottomSheetThemeData(
+        backgroundColor: Color(0xFF13132A),
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+        ),
+      ),
+      snackBarTheme: const SnackBarThemeData(
+        backgroundColor: Color(0xFF1A1A30),
+        contentTextStyle: TextStyle(color: Colors.white),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(12))),
+        behavior: SnackBarBehavior.floating,
+      ),
+      switchTheme: SwitchThemeData(
+        thumbColor: WidgetStateProperty.resolveWith((states) =>
+            states.contains(WidgetState.selected) ? const Color(0xFF6C63FF) : Colors.grey),
+        trackColor: WidgetStateProperty.resolveWith((states) =>
+            states.contains(WidgetState.selected) ? const Color(0xFF6C63FF).withOpacity(0.4) : Colors.grey.shade800),
+      ),
+      iconTheme: const IconThemeData(color: Color(0xFF6C63FF)),
+    );
+
+    // Light theme is the same dark purple (app is primarily dark)
     return MaterialApp(
       title: 'PASSEC',
       debugShowCheckedModeBanner: false,
-      themeMode: themeMode,
-      // Minimalist Modern Light Theme
-      theme: ThemeData(
-        brightness: Brightness.light,
-        primaryColor: Colors.black,
-        scaffoldBackgroundColor: const Color(0xFFFAFAFA),
-        colorScheme: const ColorScheme.light(
-          primary: Colors.black,
-          secondary: Colors.black54,
-          surface: Colors.white,
-          onSurface: Colors.black87,
-        ),
-        appBarTheme: const AppBarTheme(
-          backgroundColor: Color(0xFFFAFAFA),
-          elevation: 0,
-          iconTheme: IconThemeData(color: Colors.black87),
-          titleTextStyle: TextStyle(color: Colors.black87, fontWeight: FontWeight.bold, fontSize: 20),
-        ),
-        cardTheme: CardThemeData(
-          color: Colors.white,
-          elevation: 0,
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(12),
-            side: BorderSide(color: Colors.grey.shade200),
-          ),
-        ),
-        textTheme: const TextTheme(
-          titleLarge: TextStyle(fontWeight: FontWeight.bold, color: Colors.black87),
-          titleMedium: TextStyle(fontWeight: FontWeight.w600, color: Colors.black87),
-          bodyMedium: TextStyle(color: Colors.black54),
-        ),
-        inputDecorationTheme: InputDecorationTheme(
-          filled: true,
-          fillColor: Colors.grey.shade50,
-          border: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(12),
-            borderSide: BorderSide(color: Colors.grey.shade300),
-          ),
-          enabledBorder: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(12),
-            borderSide: BorderSide(color: Colors.grey.shade300),
-          ),
-          focusedBorder: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(12),
-            borderSide: const BorderSide(color: Colors.black, width: 2),
-          ),
-        ),
-        elevatedButtonTheme: ElevatedButtonThemeData(
-          style: ElevatedButton.styleFrom(
-            backgroundColor: Colors.black,
-            foregroundColor: Colors.white,
-            elevation: 0,
-            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-            padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 14),
-          ),
-        ),
-        useMaterial3: true,
-      ),
-      // Minimalist Modern Dark Theme
-      darkTheme: ThemeData(
-        brightness: Brightness.dark,
-        primaryColor: Colors.white,
-        scaffoldBackgroundColor: const Color(0xFF121212),
-        colorScheme: const ColorScheme.dark(
-          primary: Colors.white,
-          secondary: Colors.grey,
-          surface: Color(0xFF1E1E1E),
-          onSurface: Colors.white,
-        ),
-        appBarTheme: const AppBarTheme(
-          backgroundColor: Color(0xFF121212),
-          elevation: 0,
-          iconTheme: IconThemeData(color: Colors.white),
-          titleTextStyle: TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 20),
-        ),
-        cardTheme: CardThemeData(
-          color: const Color(0xFF1E1E1E),
-          elevation: 0,
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(12),
-            side: BorderSide(color: Colors.grey.shade900),
-          ),
-        ),
-        textTheme: const TextTheme(
-          titleLarge: TextStyle(fontWeight: FontWeight.bold, color: Colors.white),
-          titleMedium: TextStyle(fontWeight: FontWeight.w600, color: Colors.white70),
-          bodyMedium: TextStyle(color: Colors.white60),
-        ),
-        inputDecorationTheme: InputDecorationTheme(
-          filled: true,
-          fillColor: const Color(0xFF1A1A1A),
-          border: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(12),
-            borderSide: BorderSide(color: Colors.grey.shade800),
-          ),
-          enabledBorder: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(12),
-            borderSide: BorderSide(color: Colors.grey.shade800),
-          ),
-          focusedBorder: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(12),
-            borderSide: const BorderSide(color: Colors.white, width: 2),
-          ),
-        ),
-        elevatedButtonTheme: ElevatedButtonThemeData(
-          style: ElevatedButton.styleFrom(
-            backgroundColor: Colors.white,
-            foregroundColor: Colors.black,
-            elevation: 0,
-            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-            padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 14),
-          ),
-        ),
-        useMaterial3: true,
-      ),
+      themeMode: ThemeMode.dark, // Always use dark purple theme
+      theme: darkTheme,
+      darkTheme: darkTheme,
       home: const LifecycleManager(
         child: AppLockRouter(),
       ),
     );
   }
 }
+
 
 // Lifecycle Observer to handle Auto-Locking
 class LifecycleManager extends ConsumerStatefulWidget {
@@ -212,8 +213,8 @@ class _LifecycleManagerState extends ConsumerState<LifecycleManager>
     final lockState = ref.read(appLockProvider);
     if (lockState != AppLockState.unlocked) return;
 
-    if (state == AppLifecycleState.paused || state == AppLifecycleState.inactive) {
-      _backgroundTime = DateTime.now();
+    if (state == AppLifecycleState.paused || state == AppLifecycleState.inactive || state == AppLifecycleState.hidden) {
+      _backgroundTime ??= DateTime.now();
     } else if (state == AppLifecycleState.resumed) {
       if (_backgroundTime != null) {
         final elapsed = DateTime.now().difference(_backgroundTime!);

@@ -15,6 +15,7 @@ class SpaceScreen extends ConsumerStatefulWidget {
 class _SpaceScreenState extends ConsumerState<SpaceScreen> {
   final _searchController = TextEditingController();
   String _searchQuery = '';
+  String _filter = 'All';
 
   @override
   void dispose() {
@@ -65,6 +66,52 @@ class _SpaceScreenState extends ConsumerState<SpaceScreen> {
                 });
               },
             ),
+            const SizedBox(height: 12),
+            SingleChildScrollView(
+              scrollDirection: Axis.horizontal,
+              child: Row(
+                children: [
+                  ChoiceChip(
+                    label: const Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Icon(Icons.grid_view, size: 16),
+                        SizedBox(width: 6),
+                        Text('All'),
+                      ],
+                    ),
+                    selected: _filter == 'All',
+                    onSelected: (val) => setState(() => _filter = 'All'),
+                  ),
+                  const SizedBox(width: 8),
+                  ChoiceChip(
+                    label: const Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Icon(Icons.star, size: 16),
+                        SizedBox(width: 6),
+                        Text('Favorites'),
+                      ],
+                    ),
+                    selected: _filter == 'Favorites',
+                    onSelected: (val) => setState(() => _filter = 'Favorites'),
+                  ),
+                  const SizedBox(width: 8),
+                  ChoiceChip(
+                    label: const Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Icon(Icons.history, size: 16),
+                        SizedBox(width: 6),
+                        Text('Recent'),
+                      ],
+                    ),
+                    selected: _filter == 'Recent',
+                    onSelected: (val) => setState(() => _filter = 'Recent'),
+                  ),
+                ],
+              ),
+            ),
             const SizedBox(height: 16),
 
             // Accounts List
@@ -77,8 +124,15 @@ class _SpaceScreenState extends ConsumerState<SpaceScreen> {
                   }
 
                   final accounts = snapshot.data!;
+                  var filteredAccounts = accounts;
+                  if (_filter == 'Favorites') {
+                    filteredAccounts = filteredAccounts.where((a) => a.isFavorite).toList();
+                  } else if (_filter == 'Recent') {
+                    filteredAccounts = List.from(filteredAccounts)
+                      ..sort((a, b) => b.updatedAt.compareTo(a.updatedAt));
+                  }
 
-                  if (accounts.isEmpty) {
+                  if (filteredAccounts.isEmpty) {
                     return Center(
                       child: Column(
                         mainAxisAlignment: MainAxisAlignment.center,
@@ -108,9 +162,9 @@ class _SpaceScreenState extends ConsumerState<SpaceScreen> {
                   }
 
                   return ListView.builder(
-                    itemCount: accounts.length,
+                    itemCount: filteredAccounts.length,
                     itemBuilder: (context, index) {
-                      final account = accounts[index];
+                      final account = filteredAccounts[index];
                       final initial = account.accountName.isNotEmpty ? account.accountName[0].toUpperCase() : '?';
 
                       return Card(

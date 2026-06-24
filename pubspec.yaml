@@ -31,8 +31,9 @@ dependencies:
   uuid: ^4.3.3
   shared_preferences: ^2.2.3
   crypto: ^3.0.3
-  file_picker: ^8.1.7
   share_plus: ^10.1.4
+  file_picker: ^8.1.2
+  file_saver: ^0.2.10
 
   # Icons
   cupertino_icons: ^1.0.6

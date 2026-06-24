@@ -302,9 +302,9 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                     physics: const NeverScrollableScrollPhysics(),
                     gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
                       crossAxisCount: 2,
-                      crossAxisSpacing: 12,
-                      mainAxisSpacing: 12,
-                      childAspectRatio: 1.1,
+                      crossAxisSpacing: 16,
+                      mainAxisSpacing: 16,
+                      childAspectRatio: 0.85,
                     ),
                     itemCount: filteredSpaces.length,
                     itemBuilder: (context, index) {
@@ -325,7 +325,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                             onLongPress: () => _showSpaceOptions(space),
                             child: Card(
                               child: Padding(
-                                padding: const EdgeInsets.all(12.0),
+                                padding: const EdgeInsets.all(16.0),
                                 child: Column(
                                   crossAxisAlignment: CrossAxisAlignment.start,
                                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
